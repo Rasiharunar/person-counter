@@ -2,8 +2,8 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Smart Room Person Counter</title>
     <style>
         body {
@@ -23,11 +23,35 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
         h1 {
-            text-align: center;
-            margin-bottom: 30px;
             font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 0;
+        }
+
+        .logout-btn {
+            background: linear-gradient(45deg, #f44336, #da190b);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            transform: translateY(-2px);
         }
 
         .video-container {
@@ -39,6 +63,7 @@
             max-width: 100%;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: none;
         }
 
         .controls {
@@ -156,7 +181,10 @@
 
 <body>
     <div class="container">
-        <h1>🏠 Smart Room Person Counter</h1>
+        <div class="header">
+            <h1>🏠 Smart Room Person Counter</h1>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
 
         <div class="info-panel">
             <div class="info-card">
@@ -174,7 +202,7 @@
         </div>
 
         <div class="video-container">
-            <img id="video-feed" src="/static/placeholder.jpg" alt="Video feed will appear here" style="display: none;">
+            <img id="video-feed" src="/static/placeholder.jpg" alt="Video feed will appear here" />
         </div>
 
         <div class="controls">
@@ -188,7 +216,7 @@
 
         <div class="record-section">
             <h3>📝 Record Event</h3>
-            <input type="text" id="event-name" placeholder="Enter event name...">
+            <input type="text" id="event-name" placeholder="Enter event name..." />
             <button class="btn-start" onclick="recordData()" style="width: 100%;">📊 Record Data</button>
         </div>
 
@@ -200,118 +228,125 @@
     </div>
 
     <script>
-        function showStatus( message, isError = false ) {
-            const statusDiv = document.getElementById( 'status-message' );
-            statusDiv.innerHTML = `<div class="status ${isError ? 'error' : 'success'}">${message}</div>`;
-            setTimeout( () => statusDiv.innerHTML = '', 5000 );
+        function showStatus(message, isError = false) {
+            const statusDiv = document.getElementById("status-message");
+            statusDiv.innerHTML = `<div class="status ${isError ? "error" : "success"}">${message}</div>`;
+            setTimeout(() => (statusDiv.innerHTML = ""), 5000);
         }
 
         function updateStatus() {
-            fetch( '/get_stream_status' )
-                .then( response => response.json() )
-                .then( data => {
-                    document.getElementById( 'camera-status' ).textContent = data.camera_active ? 'ON' : 'OFF';
-                    document.getElementById( 'stream-status' ).textContent = data.video_streaming ? 'ON' : 'OFF';
-                    document.getElementById( 'person-count' ).textContent = data.person_count;
+            fetch("/get_stream_status")
+                .then((response) => response.json())
+                .then((data) => {
+                    document.getElementById("camera-status").textContent = data.camera_active
+                        ? "ON"
+                        : "OFF";
+                    document.getElementById("stream-status").textContent = data.video_streaming
+                        ? "ON"
+                        : "OFF";
+                    document.getElementById("person-count").textContent = data.person_count;
 
-                    if ( data.camera_active ) {
-                        document.getElementById( 'video-feed' ).src = '/video_feed';
-                        document.getElementById( 'video-feed' ).style.display = 'block';
+                    if (data.camera_active) {
+                        document.getElementById("video-feed").src = "/video_feed";
+                        document.getElementById("video-feed").style.display = "block";
                     } else {
-                        document.getElementById( 'video-feed' ).style.display = 'none';
+                        document.getElementById("video-feed").style.display = "none";
                     }
-                } )
-                .catch( error => console.error( 'Error updating status:', error ) );
+                })
+                .catch((error) => console.error("Error updating status:", error));
         }
 
         function startCamera() {
-            fetch( '/start_camera', {
-                    method: 'POST'
-                } )
-                .then( response => response.json() )
-                .then( data => {
-                    showStatus( data.message, data.status === 'error' );
+            fetch("/start_camera", {
+                method: "POST",
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    showStatus(data.message, data.status === "error");
                     updateStatus();
-                } )
-                .catch( error => showStatus( 'Error starting camera: ' + error.message, true ) );
+                })
+                .catch((error) => showStatus("Error starting camera: " + error.message, true));
         }
 
         function stopCamera() {
-            fetch( '/stop_camera', {
-                    method: 'POST'
-                } )
-                .then( response => response.json() )
-                .then( data => {
-                    showStatus( data.message, data.status === 'error' );
+            fetch("/stop_camera", {
+                method: "POST",
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    showStatus(data.message, data.status === "error");
                     updateStatus();
-                } )
-                .catch( error => showStatus( 'Error stopping camera: ' + error.message, true ) );
+                })
+                .catch((error) => showStatus("Error stopping camera: " + error.message, true));
         }
 
         function startVideoStream() {
-            fetch( '/start_video_stream', {
-                    method: 'POST'
-                } )
-                .then( response => response.json() )
-                .then( data => {
-                    showStatus( data.message, data.status === 'error' );
+            fetch("/start_video_stream", {
+                method: "POST",
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    showStatus(data.message, data.status === "error");
                     updateStatus();
-                } )
-                .catch( error => showStatus( 'Error starting video stream: ' + error.message, true ) );
+                })
+                .catch((error) => showStatus("Error starting video stream: " + error.message, true));
         }
 
         function stopVideoStream() {
-            fetch( '/stop_video_stream', {
-                    method: 'POST'
-                } )
-                .then( response => response.json() )
-                .then( data => {
-                    showStatus( data.message, data.status === 'error' );
+            fetch("/stop_video_stream", {
+                method: "POST",
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    showStatus(data.message, data.status === "error");
                     updateStatus();
-                } )
-                .catch( error => showStatus( 'Error stopping video stream: ' + error.message, true ) );
+                })
+                .catch((error) => showStatus("Error stopping video stream: " + error.message, true));
         }
 
         function testApi() {
-            fetch( '/test_api' )
-                .then( response => response.json() )
-                .then( data => {
-                    showStatus( `API Test: ${data.status} (Code: ${data.response_code})`, data.status === 'error' );
-                } )
-                .catch( error => showStatus( 'Error testing API: ' + error.message, true ) );
+            fetch("/test_api")
+                .then((response) => response.json())
+                .then((data) => {
+                    showStatus(
+                        `API Test: ${data.status} (Code: ${data.response_code})`,
+                        data.status === "error"
+                    );
+                })
+                .catch((error) => showStatus("Error testing API: " + error.message, true));
         }
 
         function sendFrame() {
-            fetch( '/send_frame', {
-                    method: 'POST'
-                } )
-                .then( response => response.json() )
-                .then( data => {
-                    showStatus( data.message, data.status === 'error' );
-                } )
-                .catch( error => showStatus( 'Error sending frame: ' + error.message, true ) );
+            fetch("/send_frame", {
+                method: "POST",
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    showStatus(data.message, data.status === "error");
+                })
+                .catch((error) => showStatus("Error sending frame: " + error.message, true));
         }
 
         function recordData() {
-            const eventName = document.getElementById( 'event-name' ).value;
-            if ( !eventName ) {
-                showStatus( 'Please enter an event name', true );
+            const eventName = document.getElementById("event-name").value;
+            if (!eventName) {
+                showStatus("Please enter an event name", true);
                 return;
             }
 
-            fetch( `/record_data?event_name=${encodeURIComponent(eventName)}` )
-                .then( response => response.json() )
-                .then( data => {
-                    showStatus( data.message, data.status === 'error' );
-                    if ( data.status === 'success' ) {
-                        document.getElementById( 'event-name' ).value = '';
+            fetch(`/record_data?event_name=${encodeURIComponent(eventName)}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    showStatus(data.message, data.status === "error");
+                    if (data.status === "success") {
+                        document.getElementById("event-name").value = "";
                     }
-                } )
-                .catch( error => showStatus( 'Error recording data: ' + error.message, true ) );
+                })
+                .catch((error) => showStatus("Error recording data: " + error.message, true));
         }
 
         // Update status every 2 seconds
-        setInterval( updateStatus, 2000 );
+        setInterval(updateStatus, 2000);
 
         // Initial status update
         updateStatus();
